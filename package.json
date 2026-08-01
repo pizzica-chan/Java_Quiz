@@ -5,11 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build": "tsc && npm run validate:questions && npm run validate:highlight && vite build",
+    "validate:questions": "tsx scripts/validate-questions.mts",
+    "validate:highlight": "tsx scripts/audit-highlight.mts",
+    "validate:regression": "tsx scripts/regression-smoke.mts",
+    "preview": "vite preview",
+    "deploy": "npm run build && wrangler deploy"
   },
   "devDependencies": {
+    "tsx": "^4.19.4",
     "typescript": "^5.7.3",
-    "vite": "^6.0.7"
+    "vite": "^6.0.7",
+    "wrangler": "^4.118.0"
   }
 }
