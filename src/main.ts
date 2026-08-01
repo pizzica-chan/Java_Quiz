@@ -1,4 +1,5 @@
 import "./style.css";
+import { computeBraceDepths, highlightJava } from "./javaHighlight";
 import {
   DIFFICULTY_META,
   countByDifficulty,
@@ -52,64 +53,12 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function wrapSymbols(
-  html: string,
-  lineNo: number,
-  activeSym: string | null,
-  activeLine: number | null,
-): string {
-  return html.replace(/(<[^>]+>)|(\b[A-Za-z_][A-Za-z0-9_]*\b)/g, (match, tag, ident) => {
-    if (tag) return tag;
-    if (!ident) return match;
-
-    const classes = ["sym"];
-    if (activeSym !== null && ident === activeSym) {
-      classes.push("sym-highlight");
-      if (lineNo === activeLine) classes.push("sym-active");
-    }
-
-    return `<span class="${classes.join(" ")}" data-sym="${escapeHtml(ident)}">${ident}</span>`;
-  });
-}
-
-function highlightJava(
-  line: string,
-  lineNo: number,
-  activeSym: string | null,
-  activeLine: number | null,
-): string {
-  const escaped = escapeHtml(line);
-  if (!line.trim()) return escaped;
-
-  const placeholders: string[] = [];
-  const stash = (html: string): string => {
-    const id = placeholders.length;
-    placeholders.push(html);
-    return `\x00PH${id}\x00`;
-  };
-
-  let out = escaped
-    .replace(/(\/\/.*)$/g, (match) => stash(`<span class="cmt">${match}</span>`))
-    .replace(/("(?:\\.|[^"\\])*")/g, (match) => stash(`<span class="str">${match}</span>`))
-    .replace(/\b(\d+)\b/g, (match) => stash(`<span class="num">${match}</span>`))
-    .replace(
-      /\b(public|private|protected|class|interface|extends|implements|return|if|else|for|while|try|catch|finally|throw|throws|new|static|final|void|int|long|boolean|double|float|String|List|Map|Optional|Date|synchronized|volatile|import|package|this|super|null|true|false|instanceof|switch|case|default|Override)\b/g,
-      (match) => stash(`<span class="kw">${match}</span>`),
-    );
-
-  return wrapSymbols(
-    out.replace(/\x00PH(\d+)\x00/g, (_, index) => placeholders[Number(index)]!),
-    lineNo,
-    activeSym,
-    activeLine,
-  );
-}
-
 function renderStart(): void {
-  const difficultyCards = DIFFICULTIES.map((d) => {
+  const difficultyCards = DIFFICULTIES.map((d, index) => {
     const meta = DIFFICULTY_META[d];
     const count = countByDifficulty(d);
     const selected = state.difficulty === d;
+    const num = String(index + 1).padStart(2, "0");
     return `
       <button
         type="button"
@@ -117,9 +66,12 @@ function renderStart(): void {
         data-difficulty="${d}"
         aria-pressed="${selected}"
       >
-        <span class="difficulty-label">${meta.label}</span>
-        <span class="difficulty-desc">${meta.description}</span>
-        <span class="difficulty-count">${count} 問</span>
+        <span class="difficulty-index">(${num})</span>
+        <span class="difficulty-main">
+          <span class="difficulty-label">${meta.label}</span>
+          <span class="difficulty-desc">${meta.description}</span>
+        </span>
+        <span class="difficulty-count">${count} Q</span>
       </button>
     `;
   }).join("");
@@ -129,14 +81,15 @@ function renderStart(): void {
   app.innerHTML = `
     <main class="container">
       <header class="hero">
-        <h1>Java アンチパターン クイズ</h1>
+        <h1 class="hero-title">Java<br />アンチパターン<br />クイズ</h1>
         <p class="lead">
-          Java のコードサンプルを読み、アンチパターンになっている<strong>行</strong>を見つけましょう。
+          Java のコードサンプルを読み、アンチパターンになっている行を見つけましょう。
           難易度を選んで挑戦できます。
         </p>
       </header>
 
       <section class="card difficulty-section">
+        <p class="section-label">(Difficulty)</p>
         <h2>難易度を選択</h2>
         <div class="difficulty-grid" role="group" aria-label="難易度">
           ${difficultyCards}
@@ -144,17 +97,18 @@ function renderStart(): void {
       </section>
 
       <section class="card info-card">
+        <p class="section-label">(How to play)</p>
         <h2>遊び方</h2>
         <ol>
-          <li>難易度を選んで「クイズを始める」を押します</li>
-          <li>問題文の観点に沿って、アンチパターンの行をクリックします</li>
-          <li>同種の問題が複数行ある場合は、代表の1行でも正解です</li>
-          <li>「回答する」で採点。解説を読んで次へ進みます</li>
+          <li data-index="01">難易度を選んで「クイズを始める」を押します</li>
+          <li data-index="02">問題文の観点に沿って、アンチパターンの行をクリックします</li>
+          <li data-index="03">同種の問題が複数行ある場合は、代表の1行でも正解です</li>
+          <li data-index="04">「回答する」で採点。解説を読んで次へ進みます</li>
         </ol>
       </section>
 
       <button class="btn btn-primary btn-large" id="start-btn">
-        ${meta.label}（${countByDifficulty(state.difficulty)}問）で始める
+        ${meta.label}で始める
       </button>
     </main>
   `;
@@ -175,6 +129,7 @@ function renderQuiz(): void {
   const progress = ((state.currentIndex + (state.answered ? 1 : 0)) / total) * 100;
   const meta = DIFFICULTY_META[state.difficulty];
 
+  const braceDepths = computeBraceDepths(question.code);
   const codeHtml = question.code
     .map((line, index) => {
       const lineNo = index + 1;
@@ -198,7 +153,7 @@ function renderQuiz(): void {
       return `
         <div class="${classes.join(" ")}" data-line="${lineNo}" role="button" tabindex="0" aria-pressed="${isSelected}">
           <span class="line-no">${lineNo}</span>
-          <code class="line-code">${highlightJava(line, lineNo, state.highlightedSymbol, state.highlightedSymbolLine) || "&nbsp;"}</code>
+          <code class="line-code">${highlightJava(line, lineNo, state.highlightedSymbol, state.highlightedSymbolLine, braceDepths[index]) || "&nbsp;"}</code>
         </div>
       `;
     })
@@ -239,9 +194,9 @@ function renderQuiz(): void {
         <div class="quiz-meta">
           <span>
             <span class="diff-pill ${meta.color}">${meta.label}</span>
-            問題 ${state.currentIndex + 1} / ${total}
+            Q ${state.currentIndex + 1} / ${total}
           </span>
-          <span>スコア: ${state.score}</span>
+          <span>Score ${state.score}</span>
         </div>
         <div class="progress-bar" aria-hidden="true">
           <div class="progress-fill" style="width: ${progress}%"></div>
@@ -256,9 +211,6 @@ function renderQuiz(): void {
 
         <div class="code-block" role="group" aria-label="Java コード">
           <div class="code-toolbar">
-            <span class="dot red"></span>
-            <span class="dot yellow"></span>
-            <span class="dot green"></span>
             <span class="filename">Example.java</span>
           </div>
           <div class="code-lines">${codeHtml}</div>
@@ -271,7 +223,7 @@ function renderQuiz(): void {
             !state.answered
               ? `
             <button class="btn btn-ghost" id="hint-btn" ${state.showHint ? "disabled" : ""}>
-              ヒントを見る
+              ヒント
             </button>
             <button class="btn btn-primary" id="submit-btn" ${state.selectedLines.size === 0 ? "disabled" : ""}>
               回答する
@@ -353,6 +305,7 @@ function renderResult(): void {
   app.innerHTML = `
     <main class="container">
       <section class="card result-card">
+        <p class="section-label">(Result)</p>
         <p class="diff-pill ${meta.color} result-diff">${meta.label}</p>
         <h1>結果発表</h1>
         <p class="score-display">${state.score} <span>/ ${total}</span></p>
