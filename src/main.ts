@@ -22,6 +22,8 @@ interface AppState {
   score: number;
   lastCorrect: boolean | null;
   showHint: boolean;
+  highlightedSymbol: string | null;
+  highlightedSymbolLine: number | null;
 }
 
 const state: AppState = {
@@ -34,6 +36,8 @@ const state: AppState = {
   score: 0,
   lastCorrect: null,
   showHint: false,
+  highlightedSymbol: null,
+  highlightedSymbolLine: null,
 };
 
 const app = document.getElementById("app")!;
@@ -48,7 +52,32 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function highlightJava(line: string): string {
+function wrapSymbols(
+  html: string,
+  lineNo: number,
+  activeSym: string | null,
+  activeLine: number | null,
+): string {
+  return html.replace(/(<[^>]+>)|(\b[A-Za-z_][A-Za-z0-9_]*\b)/g, (match, tag, ident) => {
+    if (tag) return tag;
+    if (!ident) return match;
+
+    const classes = ["sym"];
+    if (activeSym !== null && ident === activeSym) {
+      classes.push("sym-highlight");
+      if (lineNo === activeLine) classes.push("sym-active");
+    }
+
+    return `<span class="${classes.join(" ")}" data-sym="${escapeHtml(ident)}">${ident}</span>`;
+  });
+}
+
+function highlightJava(
+  line: string,
+  lineNo: number,
+  activeSym: string | null,
+  activeLine: number | null,
+): string {
   const escaped = escapeHtml(line);
   if (!line.trim()) return escaped;
 
@@ -68,7 +97,12 @@ function highlightJava(line: string): string {
       (match) => stash(`<span class="kw">${match}</span>`),
     );
 
-  return out.replace(/\x00PH(\d+)\x00/g, (_, index) => placeholders[Number(index)]!);
+  return wrapSymbols(
+    out.replace(/\x00PH(\d+)\x00/g, (_, index) => placeholders[Number(index)]!),
+    lineNo,
+    activeSym,
+    activeLine,
+  );
 }
 
 function renderStart(): void {
@@ -95,7 +129,6 @@ function renderStart(): void {
   app.innerHTML = `
     <main class="container">
       <header class="hero">
-        <div class="badge">Frontend Only</div>
         <h1>Java アンチパターン クイズ</h1>
         <p class="lead">
           Java のコードサンプルを読み、アンチパターンになっている<strong>行</strong>を見つけましょう。
@@ -165,7 +198,7 @@ function renderQuiz(): void {
       return `
         <div class="${classes.join(" ")}" data-line="${lineNo}" role="button" tabindex="0" aria-pressed="${isSelected}">
           <span class="line-no">${lineNo}</span>
-          <code class="line-code">${highlightJava(line) || "&nbsp;"}</code>
+          <code class="line-code">${highlightJava(line, lineNo, state.highlightedSymbol, state.highlightedSymbolLine) || "&nbsp;"}</code>
         </div>
       `;
     })
@@ -254,6 +287,29 @@ function renderQuiz(): void {
       </section>
     </main>
   `;
+
+  document.querySelector(".code-lines")?.addEventListener("click", (e) => {
+    const symEl = (e.target as HTMLElement).closest(".sym") as HTMLElement | null;
+    if (!symEl) return;
+
+    e.stopPropagation();
+
+    const name = symEl.getAttribute("data-sym");
+    if (!name) return;
+
+    const lineEl = symEl.closest(".code-line");
+    const lineNo = lineEl ? Number(lineEl.getAttribute("data-line")) : null;
+
+    if (state.highlightedSymbol === name) {
+      state.highlightedSymbol = null;
+      state.highlightedSymbolLine = null;
+    } else {
+      state.highlightedSymbol = name;
+      state.highlightedSymbolLine = lineNo;
+    }
+
+    renderQuiz();
+  });
 
   if (!state.answered) {
     document.querySelectorAll(".code-line.clickable").forEach((el) => {
@@ -350,6 +406,8 @@ function nextQuestion(): void {
     state.answered = false;
     state.lastCorrect = null;
     state.showHint = false;
+    state.highlightedSymbol = null;
+    state.highlightedSymbolLine = null;
     renderQuiz();
   } else {
     state.screen = "result";
@@ -365,6 +423,8 @@ function startQuiz(): void {
   state.score = 0;
   state.lastCorrect = null;
   state.showHint = false;
+  state.highlightedSymbol = null;
+  state.highlightedSymbolLine = null;
   state.screen = "quiz";
   render();
 }
