@@ -33,7 +33,7 @@ export const moreQuestions: QuizQuestion[] = [
       "    }",
       "}",
     ],
-    antiPatternLines: [11],
+    antiPatternLines: [10],
     patternName: "条件式での代入",
     explanation:
       "if (ready = true) は比較ではなく代入です。常に true になり、ready の値も書き換わります。比較には == や、単純に if (ready) を使いましょう。",
@@ -130,7 +130,7 @@ export const moreQuestions: QuizQuestion[] = [
       "    }",
       "}",
     ],
-    antiPatternLines: [15],
+    antiPatternLines: [14],
     patternName: "printStackTrace への依存",
     explanation:
       "printStackTrace は標準エラーへ直接出し、ログレベルや出力先を制御できません。ロガー経由で記録するか、適切に再スローしましょう。",
@@ -164,7 +164,7 @@ export const moreQuestions: QuizQuestion[] = [
       "    }",
       "}",
     ],
-    antiPatternLines: [11, 15],
+    antiPatternLines: [10, 14],
     patternName: "マジックストリング",
     explanation:
       "\"DONE\" や \"FAILED\" がコードに直書きされています。定数や enum にすると、綴りミスや変更漏れを防げます（status が null のときは NPE も起きます）。",
@@ -197,7 +197,7 @@ export const moreQuestions: QuizQuestion[] = [
       "    }",
       "}",
     ],
-    antiPatternLines: [14],
+    antiPatternLines: [13],
     patternName: "到達不能コード",
     explanation:
       "return の後の文は決して実行されません。不要なら削除し、必要な処理なら return の前に移しましょう。",
@@ -227,7 +227,7 @@ export const moreQuestions: QuizQuestion[] = [
       "    }",
       "}",
     ],
-    antiPatternLines: [7],
+    antiPatternLines: [6],
     patternName: "空文字への無防備な charAt",
     explanation:
       "text が空文字だと StringIndexOutOfBoundsException になります。長さを確認してから取り出すか、isEmpty を先に見ましょう。",
@@ -448,7 +448,7 @@ export const moreQuestions: QuizQuestion[] = [
       "  }",
       "}",
     ],
-    antiPatternLines: [6],
+    antiPatternLines: [7],
     patternName: "不要な new String",
     explanation:
       "new String(\"Hello, \") は余分なコピーを作ります。文字列リテラルをそのまま渡せば十分です。",
@@ -733,7 +733,7 @@ export const moreQuestions: QuizQuestion[] = [
       "    }",
       "}",
     ],
-    antiPatternLines: [18],
+    antiPatternLines: [19],
     patternName: "equals と矛盾する hashCode",
     explanation:
       "常に 1 を返す hashCode は等価なオブジェクトを同じバケツに押し込み、性能を壊します。またフィールドを使わない実装は保守時に equals とズレやすいです。Objects.hash(code) を使いましょう。",
@@ -965,7 +965,7 @@ export const moreQuestions: QuizQuestion[] = [
       "    }",
       "}",
     ],
-    antiPatternLines: [14],
+    antiPatternLines: [15],
     patternName: "原因例外の欠落",
     explanation:
       "cause を渡さないと元の SQLException が消えます。new IllegalStateException(\"save failed\", ex) のように原因をチェーンしましょう。",
@@ -1058,7 +1058,7 @@ export const moreQuestions: QuizQuestion[] = [
       "    }",
       "}",
     ],
-    antiPatternLines: [13],
+    antiPatternLines: [14],
     patternName: "失敗を空リストで隠す",
     explanation:
       "通信失敗も「0件」に見えるため、呼び出し側が誤った判断をします。例外を伝播するか、結果型で失敗を表現しましょう。",
