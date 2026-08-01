@@ -8,7 +8,7 @@ export const moreQuestions: QuizQuestion[] = [
     difficulty: "beginner",
     title: "条件式の書き方",
     description:
-      "準備完了かどうかを判定する処理です。意図しない代入が起きている行を1つ選んでください。",
+      "準備完了かどうかを判定する処理です。条件の評価として誤っている行を1つ選んでください。",
     code: [
       "public class JobRunner {",
       "    private final TaskScheduler scheduler;",
@@ -173,9 +173,9 @@ export const moreQuestions: QuizQuestion[] = [
   {
     id: 36,
     difficulty: "beginner",
-    title: "到達しないコード",
+    title: "価格計算",
     description:
-      "結果を返すメソッドです。実行されないコードを含む行を1つ選んでください。",
+      "価格を計算して返すメソッドです。制御の流れとして不自然な行を1つ選んでください。",
     code: [
       "public class PriceCalculator {",
       "    private final TaxService taxService;",
@@ -397,7 +397,7 @@ export const moreQuestions: QuizQuestion[] = [
     difficulty: "beginner",
     title: "真偽値の返し方",
     description:
-      "条件を返すメソッドです。冗長で読みにくい行を選んでください。",
+      "数値の性質を判定するメソッドです。簡潔に書けるのに冗長になっている行を選んでください。",
     code: [
       "public class NumberRules {",
       "    public boolean isPositive(int n) {",
@@ -408,12 +408,14 @@ export const moreQuestions: QuizQuestion[] = [
       "        }",
       "    }",
       "",
-      "    public boolean isZero(int n) {",
-      "        return n == 0;",
+      "    public int abs(int n) {",
+      "        return n < 0 ? -n : n;",
       "    }",
       "",
-      "    public boolean isNegative(int n) {",
-      "        return n < 0;",
+      "    public int signum(int n) {",
+      "        if (n > 0) return 1;",
+      "        if (n < 0) return -1;",
+      "        return 0;",
       "    }",
       "}",
     ],
@@ -426,12 +428,11 @@ export const moreQuestions: QuizQuestion[] = [
   {
     id: 44,
     difficulty: "beginner",
-    title: "オブジェクトの生成",
+    title: "挨拶メッセージ",
     description:
-      "メッセージを組み立てる処理です。不要なオブジェクト生成がある行を1つ選んでください。",
+      "名前を受け取り挨拶文を返す処理です。文字列の扱いとして無駄がある行を1つ選んでください。",
     code: [
       "public class GreetingService {",
-      "  private static final String PREFIX = \"Hello, \";",
       "",
       "  public String message(String name) {",
       "    if (name == null || name.isBlank()) {",
@@ -442,12 +443,12 @@ export const moreQuestions: QuizQuestion[] = [
       "    return sb.toString();",
       "  }",
       "",
-      "  public String formalMessage(String name) {",
-      "    return PREFIX + name;",
+      "  public String shortName(String name) {",
+      "    return name == null ? \"\" : name.strip();",
       "  }",
       "}",
     ],
-    antiPatternLines: [8],
+    antiPatternLines: [6],
     patternName: "不要な new String",
     explanation:
       "new String(\"Hello, \") は余分なコピーを作ります。文字列リテラルをそのまま渡せば十分です。",
@@ -564,7 +565,7 @@ export const moreQuestions: QuizQuestion[] = [
       "    }",
       "",
       "    public String today() {",
-      "        return new Date().toString();",
+      "        return Date.from(clock.instant()).toString();",
       "    }",
       "",
       "    public Instant now() {",
@@ -692,10 +693,8 @@ export const moreQuestions: QuizQuestion[] = [
       "        logger.debug(\"user=\" + user.toDetailString());",
       "    }",
       "",
-      "    public void infoUser(User user) {",
-      "        if (user != null) {",
-      "            logger.info(\"user id={}\", user.getId());",
-      "        }",
+      "    public String label(User user) {",
+      "        return user == null ? \"anonymous\" : user.getId();",
       "    }",
       "}",
     ],
@@ -743,7 +742,7 @@ export const moreQuestions: QuizQuestion[] = [
   {
     id: 54,
     difficulty: "intermediate",
-    title: "オートボクシング",
+    title: "合計の計算",
     description:
       "合計を求める処理です。実行時例外を招きうる行を1つ選んでください。",
     code: [
@@ -759,8 +758,8 @@ export const moreQuestions: QuizQuestion[] = [
       "        return total;",
       "    }",
       "",
-      "    public long sumLong(List<Long> values) {",
-      "        return values.stream().mapToLong(Long::longValue).sum();",
+      "    public int count(List<?> values) {",
+      "        return values == null ? 0 : values.size();",
       "    }",
       "}",
     ],
@@ -784,7 +783,7 @@ export const moreQuestions: QuizQuestion[] = [
       "        Objects.requireNonNull(path);",
       "        byte[] bytes = Files.readAllBytes(path);",
       "        logger.debug(\"read {} bytes from {}\", bytes.length, path);",
-      "        return new String(Files.readAllBytes(path));",
+      "        return new String(bytes);",
       "    }",
       "",
       "    public long size(Path path) throws IOException {",
@@ -831,9 +830,9 @@ export const moreQuestions: QuizQuestion[] = [
   {
     id: 57,
     difficulty: "intermediate",
-    title: "Optional の使い方",
+    title: "ユーザー取得",
     description:
-      "ユーザー取得です。Optional の意図に反する行を1つ選んでください。",
+      "ユーザー取得です。戻り値の設計として好ましくない行を1つ選んでください。",
     code: [
       "public class UserService {",
       "    private final UserRepository repository;",
@@ -846,8 +845,8 @@ export const moreQuestions: QuizQuestion[] = [
       "        return repository.find(id).orElse(null);",
       "    }",
       "",
-      "    public Optional<User> findUser(long id) {",
-      "        return repository.find(id);",
+      "    public long repositoryId() {",
+      "        return System.identityHashCode(repository);",
       "    }",
       "}",
     ],
@@ -855,14 +854,14 @@ export const moreQuestions: QuizQuestion[] = [
     patternName: "Optional から null を取り出す",
     explanation:
       "Optional を使う意味が薄れ、再び NPE のリスクが戻ります。Optional を返すか、orElseThrow / デフォルトオブジェクトを使いましょう。",
-    hint: "Optional を導入した理由は何でしたか？",
+    hint: "見つからないときの戻り方は、呼び出し側にどんな負担をかけますか？",
   },
   {
     id: 58,
     difficulty: "intermediate",
-    title: "ストリームの終端",
+    title: "名前の出力",
     description:
-      "フィルタ結果を使う処理です。途中でストリームを壊す行を1つ選んでください。",
+      "条件に合う名前を出力する処理です。実行時例外を招きうる行を1つ選んでください。",
     code: [
       "public class NamePrinter {",
       "    private static final Logger logger = LoggerFactory.getLogger(NamePrinter.class);",
@@ -874,16 +873,16 @@ export const moreQuestions: QuizQuestion[] = [
       "        stream.count();",
       "    }",
       "",
-      "    public long countLongNames(List<String> names) {",
-      "        return names.stream().filter(n -> n.length() > 3).count();",
+      "    public boolean anyLongName(List<String> names) {",
+      "        return names.stream().anyMatch(n -> n.length() > 3);",
       "    }",
       "}",
     ],
-    antiPatternLines: [9],
+    antiPatternLines: [8],
     patternName: "消費済み Stream の再利用",
     explanation:
       "Stream は終端操作のあと再利用できません。count() で IllegalStateException になります。必要なら元データから作り直しましょう。",
-    hint: "forEach のあと、同じ stream はまだ使えますか？",
+    hint: "終端操作のあと同じ参照は、もう一度使えますか？",
   },
   {
     id: 59,
@@ -1155,7 +1154,7 @@ export const moreQuestions: QuizQuestion[] = [
   {
     id: 68,
     difficulty: "intermediate",
-    title: "BigDecimal の生成",
+    title: "金額の変換",
     description:
       "金額計算の入力です。精度が崩れる行を1つ選んでください。",
     code: [
@@ -1169,8 +1168,8 @@ export const moreQuestions: QuizQuestion[] = [
       "        return new BigDecimal(raw);",
       "    }",
       "",
-      "    public BigDecimal fromString(String raw) {",
-      "        return new BigDecimal(raw);",
+      "    public int scale() {",
+      "        return SCALE;",
       "    }",
       "}",
     ],
@@ -1183,9 +1182,9 @@ export const moreQuestions: QuizQuestion[] = [
   {
     id: 69,
     difficulty: "intermediate",
-    title: "スレッドの起動",
+    title: "非同期実行",
     description:
-      "並列実行したい処理です。意図どおり並列にならない行を1つ選んでください。",
+      "別スレッドでタスクを走らせたい処理です。意図した並行実行にならない行を1つ選んでください。",
     code: [
       "public class AsyncRunner {",
       "    private static final Logger logger = LoggerFactory.getLogger(AsyncRunner.class);",
@@ -1197,8 +1196,8 @@ export const moreQuestions: QuizQuestion[] = [
       "        worker.run();",
       "    }",
       "",
-      "    public void runSync(Runnable task) {",
-      "        task.run();",
+      "    public String workerName() {",
+      "        return \"async-worker\";",
       "    }",
       "}",
     ],
@@ -1235,7 +1234,7 @@ export const moreQuestions: QuizQuestion[] = [
     antiPatternLines: [2],
     patternName: "可変な StringBuilder を Map キーに",
     explanation:
-      "StringBuilder は可変で equals/hashCode も内容依存のため、キー向きではありません。String など不変キーにしましょう。",
+      "StringBuilder は可変で、キー向きではありません。equals/hashCode も参照同一性のままで内容での検索ができず、中身を変えたあとの意図しない挙動も招きやすいです。String など不変キーにしましょう。",
     hint: "キーの中身は後から変わり得ますか？",
   },
 
@@ -1309,9 +1308,9 @@ export const moreQuestions: QuizQuestion[] = [
   {
     id: 73,
     difficulty: "advanced",
-    title: "wait / notify",
+    title: "完了通知",
     description:
-      "完了通知のコードです。通知が届かないことがある行を1つ選んでください。",
+      "処理完了を待つコードです。待機と通知の組み合わせとして不十分な行を1つ選んでください。",
     code: [
       "public class CompletionNotifier {",
       "    private volatile boolean done;",
@@ -1339,9 +1338,9 @@ export const moreQuestions: QuizQuestion[] = [
   {
     id: 74,
     difficulty: "advanced",
-    title: "スレッドの停止",
+    title: "タスクの打ち切り",
     description:
-      "実行中タスクを止める処理です。危険な API を使っている行を1つ選んでください。",
+      "実行中のワーカースレッドを止めようとする処理です。現在の Java では推奨されない行を1つ選んでください。",
     code: [
       "public class TaskCanceller {",
       "    private static final Logger logger = LoggerFactory.getLogger(TaskCanceller.class);",
@@ -1352,8 +1351,8 @@ export const moreQuestions: QuizQuestion[] = [
       "        worker.stop();",
       "    }",
       "",
-      "    public void interrupt(Thread worker) {",
-      "        if (worker != null) worker.interrupt();",
+      "    public String describe(Thread worker) {",
+      "        return worker == null ? \"null\" : worker.getName();",
       "    }",
       "}",
     ],
@@ -1366,9 +1365,9 @@ export const moreQuestions: QuizQuestion[] = [
   {
     id: 75,
     difficulty: "advanced",
-    title: "ConcurrentHashMap の使い方",
+    title: "カウンタの集計",
     description:
-      "カウンタを ConcurrentHashMap で持つ処理です。アトミックでない行を選んでください。",
+      "キーごとのカウンタをマップで持つ処理です。アトミックでない行を選んでください。",
     code: [
       "public class CounterMap {",
       "    private final ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();",
@@ -1458,9 +1457,9 @@ export const moreQuestions: QuizQuestion[] = [
   {
     id: 78,
     difficulty: "advanced",
-    title: "スレッドプールとローカル",
+    title: "リクエスト単位の文脈",
     description:
-      "タスク内でコンテキストを載せる処理です。リークにつながる片付け方をしている行を1つ選んでください。",
+      "スレッドプール上でリクエスト ID を保持する処理です。次のタスクへ値が残るおそれがある片付け方をしている行を1つ選んでください。",
     code: [
       "public class RequestContext {",
       "    private static final ThreadLocal<String> CONTEXT = new ThreadLocal<>();",
@@ -1523,9 +1522,9 @@ export const moreQuestions: QuizQuestion[] = [
   {
     id: 80,
     difficulty: "advanced",
-    title: "待ちの解除",
+    title: "準備完了の通知",
     description:
-      "条件が満たされたときの通知です。待ち側を起こせない行を1つ選んでください。",
+      "準備が整ったことを他スレッドへ伝える処理です。待機中のスレッドを起こせない行を1つ選んでください。",
     code: [
       "public class ReadyGate {",
       "    private boolean ready;",
@@ -1555,33 +1554,51 @@ export const moreQuestions: QuizQuestion[] = [
     description:
       "並列処理向けマップです。キー破壊につながる行を1つ選んでください。",
     code: [
-      "public class ByteKeyStore {",
-      "    private final ConcurrentHashMap<byte[], String> map = new ConcurrentHashMap<>();",
+      "static class PayloadKey {",
+      "    byte[] bytes;",
       "",
-      "    public void put(byte[] key, String value) {",
+      "    PayloadKey(byte[] bytes) {",
+      "        this.bytes = bytes;",
+      "    }",
+      "",
+      "    @Override",
+      "    public boolean equals(Object o) {",
+      "        return o instanceof PayloadKey k && Arrays.equals(bytes, k.bytes);",
+      "    }",
+      "",
+      "    @Override",
+      "    public int hashCode() {",
+      "        return Arrays.hashCode(bytes);",
+      "    }",
+      "}",
+      "",
+      "public class ByteKeyStore {",
+      "    private final ConcurrentHashMap<PayloadKey, String> map = new ConcurrentHashMap<>();",
+      "",
+      "    public void put(PayloadKey key, String value) {",
       "        Objects.requireNonNull(key);",
       "        Objects.requireNonNull(value);",
       "        map.put(key, value);",
-      "        key[0] = 0;",
+      "        key.bytes[0] = 0;",
       "    }",
       "",
-      "    public String get(byte[] key) {",
-      "        return map.get(key);",
+      "    public String get(byte[] bytes) {",
+      "        return map.get(new PayloadKey(bytes));",
       "    }",
       "}",
     ],
-    antiPatternLines: [8],
+    antiPatternLines: [26],
     patternName: "put 後のキー配列変更",
     explanation:
-      "配列は可変で、ハッシュ後に中身を変えるとエントリを見失います。キーは不変オブジェクトにコピーして使いましょう。",
+      "equals/hashCode が配列内容に依存するのに、put 後に bytes を書き換えるとエントリを見失います。キーは不変オブジェクトにコピーして使いましょう。",
     hint: "キーのバイト列は put 後も同じである必要があります。",
   },
   {
     id: 82,
     difficulty: "advanced",
-    title: "起こす相手",
+    title: "リソースの解放通知",
     description:
-      "複数待機がある処理です。一部だけ起こしてしまう行を1つ選んでください。",
+      "複数スレッドが待機している場面です。待機者のうち一部だけが進める可能性がある行を1つ選んでください。",
     code: [
       "public class ResourcePool {",
       "    private boolean condition;",
@@ -1698,7 +1715,7 @@ export const moreQuestions: QuizQuestion[] = [
   {
     id: 86,
     difficulty: "advanced",
-    title: "並列ストリーム",
+    title: "リストへの収集",
     description:
       "共有リストへ書き込む処理です。データ破壊を招く行を1つ選んでください。",
     code: [
@@ -1710,8 +1727,8 @@ export const moreQuestions: QuizQuestion[] = [
       "        return out;",
       "    }",
       "",
-      "    public List<String> collectSequential(List<String> src) {",
-      "        return new ArrayList<>(src);",
+      "    public boolean isEmpty(List<String> src) {",
+      "        return src == null || src.isEmpty();",
       "    }",
       "}",
     ],
@@ -1753,9 +1770,9 @@ export const moreQuestions: QuizQuestion[] = [
   {
     id: 88,
     difficulty: "advanced",
-    title: "起こす順序",
+    title: "完了の合図",
     description:
-      "完了フラグと通知です。待ち側が起きても条件を見誤る行を選んでください。",
+      "完了フラグと待機解除を行う処理です。待ち側が再び待ちに入ってしまうおそれがある行を選んでください。",
     code: [
       "public class CompletionFlag {",
       "    private boolean done;",
@@ -1783,7 +1800,7 @@ export const moreQuestions: QuizQuestion[] = [
   {
     id: 89,
     difficulty: "advanced",
-    title: "デーモン化",
+    title: "バックグラウンド起動",
     description:
       "バックグラウンド処理の起動です。途中で強制終了されうる行を1つ選んでください。",
     code: [

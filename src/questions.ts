@@ -104,7 +104,7 @@ export const questions: QuizQuestion[] = [
   {
     id: 2,
     difficulty: "beginner",
-    title: "マジックナンバー",
+    title: "年齢グループの判定",
     description:
       "ユーザーの年齢を判定するメソッドです。可読性・保守性の観点でアンチパターンの行を選んでください。",
     code: [
@@ -134,9 +134,9 @@ export const questions: QuizQuestion[] = [
   {
     id: 3,
     difficulty: "beginner",
-    title: "ループ内での文字列連結",
+    title: "ログの組み立て",
     description:
-      "ログメッセージを組み立てる処理です。パフォーマンス上問題のある行を1つ選んでください。",
+      "大量のログ項目からテキストを組み立てる処理です。繰り返し処理の中で、効率面で問題になりうる行を1つ選んでください。",
     code: [
       "public class LogBuilder {",
       "    private static final Logger log = LoggerFactory.getLogger(LogBuilder.class);",
@@ -163,9 +163,9 @@ export const questions: QuizQuestion[] = [
   {
     id: 4,
     difficulty: "beginner",
-    title: "例外の握りつぶし",
+    title: "ファイルの読み取り",
     description:
-      "ファイル読み込み処理です。エラー時に呼び出し側を誤解させうる行を選んでください。",
+      "ファイル読み込み処理です。失敗時の扱いとして、呼び出し側が成功と混同しうる行を選んでください。",
     code: [
       "public class FileReaderService {",
       "    private static final Logger log = LoggerFactory.getLogger(FileReaderService.class);",
@@ -191,7 +191,7 @@ export const questions: QuizQuestion[] = [
   {
     id: 5,
     difficulty: "beginner",
-    title: "null の返却",
+    title: "ユーザー検索",
     description:
       "ユーザーを検索するメソッドです。呼び出し側の安全性を損ないうる戻り方をしている行を1つ選んでください。",
     code: [
@@ -255,9 +255,9 @@ export const questions: QuizQuestion[] = [
   {
     id: 7,
     difficulty: "beginner",
-    title: "null 呼び出しの equals",
+    title: "回答の判定",
     description:
-      "入力文字列を検証する処理です。実行時例外を招きうる行を1つ選んでください。",
+      "アンケート回答を判定する処理です。引数が null のときに実行時例外になりうる行を1つ選んでください。",
     code: [
       "public class SurveyService {",
       "    private static final Logger log = LoggerFactory.getLogger(SurveyService.class);",
@@ -268,8 +268,11 @@ export const questions: QuizQuestion[] = [
       "        return input.equals(YES_VALUE);",
       "    }",
       "",
-      "    public boolean isNo(String input) {",
-      "        return \"no\".equals(input);",
+      "    public boolean matchesCategory(String input, String category) {",
+      "        if (input == null || category == null) {",
+      "            return false;",
+      "        }",
+      "        return category.equals(input.trim());",
       "    }",
       "}",
     ],
@@ -288,19 +291,18 @@ export const questions: QuizQuestion[] = [
     code: [
       "public class CalcUtil {",
       "    private static final Logger log = LoggerFactory.getLogger(CalcUtil.class);",
-      "    private static final double TOLERANCE = 1e-9;",
       "",
       "    public boolean isOne(double value) {",
       "        log.trace(\"Checking if {} equals 1.0\", value);",
       "        return value == 1.0;",
       "    }",
       "",
-      "    public boolean isNearlyEqual(double a, double b) {",
-      "        return Math.abs(a - b) < TOLERANCE;",
+      "    public String label(double value) {",
+      "        return \"value=\" + value;",
       "    }",
       "}",
     ],
-    antiPatternLines: [7],
+    antiPatternLines: [6],
     patternName: "浮動小数点の == 比較",
     explanation:
       "double / float は誤差があるため == での等価比較は危険です。許容誤差を決めて Math.abs(a - b) < epsilon のように比較します。",
@@ -618,42 +620,56 @@ export const questions: QuizQuestion[] = [
   {
     id: 19,
     difficulty: "intermediate",
-    title: "Map のキー",
+    title: "キャッシュ登録",
     description:
-      "キャッシュ用の Map です。登録したデータをあとから取り出せなくなる操作をしている行を1つ選んでください。",
+      "キーと値をキャッシュに登録する処理です。登録後に検索できなくなるおそれがある行を1つ選んでください。",
     code: [
-      "static class MutableKey {",
+      "static class CacheKey {",
       "    int id;",
       "",
-      "    MutableKey(int id) {",
+      "    CacheKey(int id) {",
       "        this.id = id;",
+      "    }",
+      "",
+      "    @Override",
+      "    public boolean equals(Object o) {",
+      "        return o instanceof CacheKey k && id == k.id;",
+      "    }",
+      "",
+      "    @Override",
+      "    public int hashCode() {",
+      "        return Integer.hashCode(id);",
       "    }",
       "}",
       "",
       "public class CacheService {",
       "    private static final Logger log = LoggerFactory.getLogger(CacheService.class);",
-      "    private final Map<MutableKey, String> cache = new HashMap<>();",
+      "    private final Map<CacheKey, String> cache = new HashMap<>();",
       "",
-      "    public void put(MutableKey key, String value) {",
+      "    public void put(CacheKey key, String value) {",
       "        Objects.requireNonNull(key);",
       "        cache.put(key, value);",
       "        key.id = 0;",
       "        log.debug(\"Cached value for key id={}\", key.id);",
       "    }",
+      "",
+      "    public String get(int id) {",
+      "        return cache.get(new CacheKey(id));",
+      "    }",
       "}",
     ],
-    antiPatternLines: [16],
+    antiPatternLines: [26],
     patternName: "可変オブジェクトを Map のキーに変更",
     explanation:
-      "HashMap のキーは put 後にハッシュ値が変わってはいけません。key.id を書き換えるとエントリを探せなくなります。キーは不変オブジェクトにしましょう。",
+      "HashMap のキーは put 後にハッシュ値が変わってはいけません。equals/hashCode が id 依存なのに key.id を書き換えると、元の id ではエントリを探せなくなります。キーは不変オブジェクトにしましょう。",
     hint: "put のあとキーの中身を変えていませんか？",
   },
   {
     id: 20,
     difficulty: "intermediate",
-    title: "toString での重い処理",
+    title: "オブジェクトの表示",
     description:
-      "デバッグ用の文字列化です。このメソッドの役割として好ましくない処理を含む行を1つ選んでください。",
+      "注文オブジェクトを文字列化する処理です。ログやデバッガから呼ばれることを踏まえ、役割として好ましくない行を1つ選んでください。",
     code: [
       "public class Order {",
       "    private static final Logger log = LoggerFactory.getLogger(Order.class);",
@@ -715,7 +731,7 @@ export const questions: QuizQuestion[] = [
     difficulty: "advanced",
     title: "遅延初期化",
     description:
-      "遅延初期化のシングルトンです。複数スレッドで問題になりうる読み取りをしている行を1つ選んでください。",
+      "遅延初期化のシングルトンです。複数スレッドで問題になりうる判定の行を1つ選んでください。",
     code: [
       "public class HelperFactory {",
       "    private static final Logger log = LoggerFactory.getLogger(HelperFactory.class);",
@@ -724,10 +740,8 @@ export const questions: QuizQuestion[] = [
       "    public static Helper getHelper() {",
       "        if (helper == null) {",
       "            synchronized (HelperFactory.class) {",
-      "                if (helper == null) {",
-      "                    helper = new Helper();",
-      "                    log.info(\"Helper instance created\");",
-      "                }",
+      "                helper = new Helper();",
+      "                log.info(\"Helper instance created\");",
       "            }",
       "        }",
       "        return helper;",
@@ -735,10 +749,10 @@ export const questions: QuizQuestion[] = [
       "}",
     ],
     antiPatternLines: [6],
-    patternName: "同期なしでの共有変数読み取り",
+    patternName: "ロック外での初期化判定",
     explanation:
-      "外側の if (helper == null) は synchronized の外で helper を読むため、他スレッドの書き込みが見えず未初期化参照の危険があります。volatile 付きフィールドにするか、ホルダークラス／enum シングルトンを使いましょう。",
-    hint: "最初の null チェックは synchronized の内側ですか？",
+      "null かどうかの判定が synchronized の外にあるため、複数スレッドが同時に生成したり、他スレッドの書き込みが見えないことがあります。判定と生成を同じロック内で行うか、ホルダークラス／enum シングルトンを使いましょう。",
+    hint: "「まだ無い」と判断している場所は、ロックの内側ですか？",
   },
   {
     id: 23,
@@ -779,9 +793,9 @@ export const questions: QuizQuestion[] = [
   {
     id: 24,
     difficulty: "advanced",
-    title: "条件待ち",
+    title: "完了待ち",
     description:
-      "条件待ちのコードです。待機の書き方として不十分な行を1つ選んでください。",
+      "準備完了フラグが立つまで待つ処理です。待機中に条件が変わるケースを考慮できていない行を1つ選んでください。",
     code: [
       "public class ReadyFlag {",
       "    private static final Logger log = LoggerFactory.getLogger(ReadyFlag.class);",
@@ -810,9 +824,9 @@ export const questions: QuizQuestion[] = [
   {
     id: 25,
     difficulty: "advanced",
-    title: "走査と削除",
+    title: "リストの整理",
     description:
-      "リストから要素を削除する処理です。走査中にコレクションを変更している行を1つ選んでください。",
+      "リクエストで受け取った文字列リストを整える処理です。実行時例外を招きうる行を1つ選んでください。",
     code: [
       "public class ListCleaner {",
       "    private static final Logger log = LoggerFactory.getLogger(ListCleaner.class);",
@@ -821,26 +835,33 @@ export const questions: QuizQuestion[] = [
       "        Objects.requireNonNull(items);",
       "        log.debug(\"Cleaning list of {} items\", items.size());",
       "        for (String item : items) {",
+      "            if (item == null) {",
+      "                continue;",
+      "            }",
       "            if (item.isEmpty()) {",
       "                items.remove(item);",
       "            }",
       "        }",
       "        log.info(\"Cleanup complete. Remaining: {}\", items.size());",
       "    }",
+      "",
+      "    public int sizeOrZero(List<String> items) {",
+      "        return items == null ? 0 : items.size();",
+      "    }",
       "}",
     ],
-    antiPatternLines: [9],
+    antiPatternLines: [12],
     patternName: "拡張 for 中のコレクション変更",
     explanation:
       "拡張 for（イテレータ）の走査中に List.remove すると ConcurrentModificationException になります。Iterator.remove() や removeIf を使いましょう。",
-    hint: "走査中に構造を変えていませんか？",
+    hint: "イテレータで見ている最中に、同じリストの構造を変えていませんか？",
   },
   {
     id: 26,
     difficulty: "advanced",
     title: "日付フォーマット",
     description:
-      "日付フォーマット用のフィールドです。複数スレッドから使うときに問題になる行を選んでください。",
+      "日付を文字列に変換するユーティリティです。同時アクセス下で不具合になりうる行を選んでください。",
     code: [
       "public class DateUtil {",
       "    private static final Logger log = LoggerFactory.getLogger(DateUtil.class);",
@@ -858,10 +879,10 @@ export const questions: QuizQuestion[] = [
       "    }",
       "}",
     ],
-    antiPatternLines: [3, 4, 9],
+    antiPatternLines: [3, 4, 9, 13],
     patternName: "スレッドセーフでない SimpleDateFormat の共有",
     explanation:
-      "SimpleDateFormat はスレッドセーフではありません。static フィールドで共有し、format() から呼び出すと複数スレッドで壊れた結果や例外が出ます。DateTimeFormatter（java.time）や ThreadLocal を検討しましょう。",
+      "SimpleDateFormat はスレッドセーフではありません。static フィールドで共有し、format/parse から呼び出すと複数スレッドで壊れた結果や例外が出ます。DateTimeFormatter（java.time）や ThreadLocal を検討しましょう。",
     hint: "このフォーマッタは複数スレッドから同時に使われます。",
   },
   {
@@ -897,9 +918,9 @@ export const questions: QuizQuestion[] = [
   {
     id: 28,
     difficulty: "advanced",
-    title: "スレッド固有データの寿命",
+    title: "リクエストコンテキスト",
     description:
-      "リクエスト単位のコンテキスト保持です。スレッド再利用時に不具合につながる片付け方をしている行を1つ選んでください。",
+      "リクエストごとにユーザーコンテキストを保持する処理です。ワーカースレッド再利用時に片付けが不十分な行を1つ選んでください。",
     code: [
       "public class RequestContext {",
       "    private static final Logger log = LoggerFactory.getLogger(RequestContext.class);",
