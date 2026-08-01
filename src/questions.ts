@@ -1,25 +1,15 @@
 import { moreQuestions } from "./moreQuestions";
 import type { Difficulty, QuizQuestion } from "./quizTypes";
+import { isIgnorableLine } from "./quizUtils";
 
 export type { Difficulty, QuizQuestion } from "./quizTypes";
+export { isIgnorableLine } from "./quizUtils";
 
 export function getSelectionGuide(question: QuizQuestion): string {
   if (question.antiPatternLines.length === 1) {
     return "該当する行を1つ選んでください。";
   }
   return "該当する行を選んでください。同種の問題が複数ある場合は、1行でもすべてでも構いません。";
-}
-
-/** 空行や括弧だけの行は誤選択とみなさない */
-export function isIgnorableLine(code: string): boolean {
-  const trimmed = code.trim();
-  return (
-    trimmed === "" ||
-    trimmed === "{" ||
-    trimmed === "}" ||
-    trimmed === "};" ||
-    trimmed === "},"
-  );
 }
 
 /**
@@ -1021,6 +1011,12 @@ export const questions: QuizQuestion[] = [
   },
   ...moreQuestions,
 ];
+
+if (typeof import.meta.env !== "undefined" && import.meta.env.DEV) {
+  void import("./validateQuestions").then(({ assertQuestionsValid }) => {
+    assertQuestionsValid(questions);
+  });
+}
 
 export function getQuestionsByDifficulty(difficulty: Difficulty): QuizQuestion[] {
   return questions.filter((q) => q.difficulty === difficulty);

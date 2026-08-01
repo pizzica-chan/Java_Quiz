@@ -1,6 +1,6 @@
 ---
 description: クイズ問題の理不尽さを排除するための作成・レビュー基準
-globs: src/questions.ts,src/main.ts
+globs: src/questions.ts,src/moreQuestions.ts,src/validateQuestions.ts,src/quizUtils.ts,src/main.ts
 alwaysApply: false
 ---
 
@@ -40,14 +40,41 @@ alwaysApply: false
 
 ### 選ばない（悪い例）
 
-- `catch (IOException e) {` のような**構文として正しい行**
+- 空行・`{`・`}` だけの行（採点では無視されるため、正解に指定してはいけない）
+- catch 宣言行だけを正解にし、本体の `throw` / `return` / `printStackTrace` を指さない（ただし「捕捉範囲が広すぎる」ことが問題なら catch 行自体が正解）
+- メソッド宣言行（`public int hashCode() {`）だけを正解にし、本体の `return 1;` を指さない
 - 「`volatile` が無い」など**存在しない行**
 - 別問題の知識で偶然正解になる行
+
+## 正解行番号の検証（必須）
+
+問題の追加・変更後は **機械検証を一次、目視を二次** とする。
+
+```bash
+npm run validate:questions   # 正解行の構造チェック（必須・build 組み込み）
+npm run validate:highlight   # ハイライト表示一致（必須・build 組み込み）
+```
+
+`npm run build` / `npm run deploy` でも両方走る。`npm run dev` 時は error があるとモジュール読み込みが失敗する。
+
+### ビルドを落とすチェック（error）
+
+- `antiPatternLines` が空・範囲外・重複
+- 正解行が `}` などの無視可能行
+- 特定型の catch 宣言だけが正解で、次行が `throw new X("msg")` / `return List.of()` / `printStackTrace` など本体アンチパターン
+- `hashCode` / `equals` / `compare` の宣言行だけが正解で、次行が本体
+- 過去にずれた既知パターンの回帰（解説マーカー。完全網羅ではない）
+
+### 警告のみ（warn・ビルドは通る）
+
+- 正解行が `{` で終わり次行が実質文（条件 if や広すぎる catch などは除外）
+- 解説の引用断片がコードにあるが正解行に無い（対照コード由来の誤検知ありうる）
+
+新規問題で「行番号が1つずれて隣接のまともな文を指す」ケースは、**構造ルール＋目視**で防ぐ。マーカーを安易に増やさない。
 
 ## コードサンプル
 
 - サンプル内に、今回の観点以外の別アンチパターンを混ぜない
-- `antiPatternLines` を変えたら、必ず行番号を数え直す
 - **アンチパターンだけの最小コードにしない**。クラス・依存・妥当な前処理・別メソッドなど、実務っぽい文脈を足して「答えが自明」にならないようにする
 - 周辺コードは正しい書き方でよい（null チェック、ロガー、定数、try-with-resources など）。ただし今回の正解と同種の別行は入れない
 - **正解メソッドの直傍に、正しい書き方の対照メソッドを置かない**（例: Yoda equals の隣に通常 equals）。対照が必要なら別責務のメソッドにする
@@ -58,5 +85,6 @@ alwaysApply: false
 1. タイトル／問題文だけで答えがバレていないか
 2. 正解以外の行を選ぶ合理的な理由が残っていないか
 3. 同種の複数行は「1行でも可」で採点されるか
-4. 解説に書いた問題が `antiPatternLines` に含まれているか
-5. シンタックスハイライト後もコードが読めるか
+4. 解説に書いた問題が `antiPatternLines` の行内容と一致するか（目視）
+5. `npm run validate:questions` が error 0 か（warn は内容確認）
+6. `npm run validate:highlight` が通るか
