@@ -534,7 +534,9 @@ function renderQuiz(): void {
           <div class="code-toolbar">
             <span class="filename">Example.java</span>
           </div>
-          <div class="code-lines">${codeHtml}</div>
+          <div class="code-scroll">
+            <div class="code-lines">${codeHtml}</div>
+          </div>
         </div>
 
         ${feedbackHtml}

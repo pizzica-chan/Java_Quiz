@@ -39,12 +39,14 @@ body {
   line-height: 1.55;
   letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 .container {
   max-width: 760px;
   margin: 0 auto;
   padding: 2.75rem 1.35rem 4rem;
+  min-width: 0;
 }
 
 .hero {
@@ -525,6 +527,8 @@ h1,
 
 .question-card {
   padding-top: 0.25rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .question-card h2 {
@@ -565,10 +569,10 @@ h1,
 .code-block {
   border: 1px solid var(--border);
   border-radius: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
+  overflow: hidden;
+  max-width: 100%;
+  min-width: 0;
+  background: var(--bg-code);
   margin-bottom: 1.35rem;
 }
 
@@ -591,7 +595,19 @@ h1,
   letter-spacing: 0.04em;
 }
 
+.code-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  background: var(--bg-code);
+  max-width: 100%;
+}
+
 .code-lines {
+  display: inline-block;
+  min-width: 100%;
+  vertical-align: top;
   background: var(--bg-code);
   font-family: var(--font-mono);
   font-size: 0.84rem;
@@ -604,6 +620,7 @@ h1,
   align-items: stretch;
   width: max-content;
   min-width: 100%;
+  box-sizing: border-box;
   border-left: 2px solid transparent;
   transition: background 0.1s;
 }
@@ -637,17 +654,37 @@ h1,
 }
 
 .line-no {
+  position: sticky;
+  left: 0;
+  z-index: 1;
   flex-shrink: 0;
   width: 2.5rem;
   padding: 0.15rem 0.5rem;
   text-align: right;
   color: #5a5a5a;
   user-select: none;
+  background: var(--bg-code);
   border-right: 1px solid #2a2a2a;
 }
 
+.code-line.selected .line-no {
+  background: #1f1f1f;
+}
+
+.code-line.correct .line-no {
+  background: #14261c;
+}
+
+.code-line.wrong .line-no {
+  background: #2a1614;
+}
+
+.code-line.missed .line-no {
+  background: #262014;
+}
+
 .line-code {
-  flex: 1;
+  flex: 0 0 auto;
   padding: 0.15rem 0.85rem;
   white-space: pre;
 }
@@ -850,11 +887,6 @@ h1,
 
   .code-lines {
     font-size: 0.76rem;
-  }
-
-  .code-block {
-    /* 端までスクロールできることを示しつつ、本文は切らない */
-    scrollbar-width: thin;
   }
 
   .list-difficulty-tabs {
