@@ -565,7 +565,10 @@ h1,
 .code-block {
   border: 1px solid var(--border);
   border-radius: 0;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
   margin-bottom: 1.35rem;
 }
 
@@ -599,6 +602,8 @@ h1,
 .code-line {
   display: flex;
   align-items: stretch;
+  width: max-content;
+  min-width: 100%;
   border-left: 2px solid transparent;
   transition: background 0.1s;
 }
@@ -645,7 +650,6 @@ h1,
   flex: 1;
   padding: 0.15rem 0.85rem;
   white-space: pre;
-  overflow-x: auto;
 }
 
 .tok-mod { color: #d4a574; }
@@ -837,6 +841,20 @@ h1,
 
   .line-code {
     font-size: 0.76rem;
+  }
+
+  .line-no {
+    width: 2.1rem;
+    padding: 0.15rem 0.35rem;
+  }
+
+  .code-lines {
+    font-size: 0.76rem;
+  }
+
+  .code-block {
+    /* 端までスクロールできることを示しつつ、本文は切らない */
+    scrollbar-width: thin;
   }
 
   .list-difficulty-tabs {
