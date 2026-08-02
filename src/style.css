@@ -187,6 +187,212 @@ h1,
   white-space: nowrap;
 }
 
+.difficulty-progress {
+  display: block;
+  margin-top: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.difficulty-card.selected .difficulty-progress {
+  color: rgba(243, 242, 238, 0.75);
+}
+
+.start-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+.start-actions .btn-ghost {
+  align-self: center;
+}
+
+.list-header {
+  margin-bottom: 1.75rem;
+}
+
+.list-header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin-bottom: 0.65rem;
+}
+
+.list-summary {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.list-difficulty-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--border);
+}
+
+.list-difficulty-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  padding: 0.85rem 0.9rem;
+  font-family: var(--font-sans);
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  color: var(--text);
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.list-difficulty-tab:last-child {
+  border-right: none;
+}
+
+.list-difficulty-tab:hover {
+  background: var(--accent-soft);
+}
+
+.list-difficulty-tab.selected {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.list-difficulty-tab-label {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.list-difficulty-tab-progress {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.list-difficulty-tab.selected .list-difficulty-tab-progress {
+  color: rgba(243, 242, 238, 0.7);
+}
+
+.question-list-section {
+  margin-bottom: 1.25rem;
+}
+
+.question-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border);
+}
+
+.question-list-item {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr auto;
+  align-items: center;
+  gap: 0.85rem 1rem;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-sans);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0.15rem;
+  cursor: pointer;
+  color: var(--text);
+  transition: background 0.15s;
+}
+
+.question-list-item:hover,
+.question-list-item.current {
+  background: var(--accent-soft);
+}
+
+.question-list-no {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.question-list-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.question-list-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.question-list-pattern {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.question-list-status {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.question-list-status.pending {
+  color: var(--text-muted);
+}
+
+.question-list-status.correct {
+  color: var(--text);
+}
+
+.question-list-status.wrong {
+  color: var(--text-muted);
+}
+
+.quiz-meta-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.btn-link {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.btn-link:hover {
+  color: var(--text);
+}
+
 .diff-pill {
   display: inline-block;
   font-family: var(--font-mono);
@@ -631,5 +837,18 @@ h1,
 
   .line-code {
     font-size: 0.76rem;
+  }
+
+  .list-difficulty-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .list-difficulty-tab {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .list-difficulty-tab:last-child {
+    border-bottom: none;
   }
 }
