@@ -60,7 +60,7 @@ npm run preview
 
 **問題の理不尽さを感じさせないこと**をこのプロジェクトの最優先ルールとする。
 
-クイズ問題の追加・変更時は `.cursor/rules/quiz-fairness.mdc` に従い、説明文・正解行・解説の整合、行選択形式との相性を必ず確認すること。
+クイズ問題の追加・変更時は `.cursor/rules/quiz-fairness.mdc`（Cursor 用）/ `CLAUDE.md`（Claude Code 用、内容は同期）に従い、説明文・正解行・解説の整合、行選択形式との相性を必ず確認すること。
 
 ## ライセンス
 
