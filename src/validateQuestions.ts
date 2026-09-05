@@ -51,7 +51,7 @@ function isMethodDeclWithBodyAntipattern(line: string, nextLine: string): boolea
  * 正解行が `{` で終わり次行が実質文 → 宣言ずれの疑い。
  * ただし条件判定・広すぎる catch・制御構文そのものが問題のケースは除外。
  */
-function isAllowedOpeningBraceAnswer(line: string, q: QuizQuestion): boolean {
+function isAllowedOpeningBraceAnswer(line: string): boolean {
   const t = line.trim();
 
   if (isBroadCatchLine(t)) return true;
@@ -72,8 +72,6 @@ function isAllowedOpeningBraceAnswer(line: string, q: QuizQuestion): boolean {
 
   // synchronized メソッド宣言そのものが粒度の問題になるケース
   if (/\bsynchronized\b/.test(t) && /\([^)]*\)\s*\{\s*$/.test(t)) return true;
-
-  if (q.antiPatternLines.length > 1) return true;
 
   return false;
 }
@@ -191,7 +189,8 @@ export function validateQuestions(questions: QuizQuestion[]): QuestionValidation
       if (
         trimmed.endsWith("{") &&
         isSubstantiveLine(next) &&
-        !isAllowedOpeningBraceAnswer(trimmed, q)
+        !q.antiPatternLines.includes(lineNo + 1) &&
+        !isAllowedOpeningBraceAnswer(trimmed)
       ) {
         issues.push({
           questionId: q.id,

@@ -566,38 +566,46 @@ function renderQuiz(): void {
   document.getElementById("quiz-home-btn")?.addEventListener("click", goToTop);
   document.getElementById("quiz-list-btn")?.addEventListener("click", () => openQuestionList("quiz"));
 
+  // シンボル強調と行選択は同じクリックで起こりうるため、1 つのハンドラで処理して
+  // 再描画を 1 回に抑える（個別に登録すると行選択→再描画→シンボル強調→再描画になる）
   document.querySelector(".code-lines")?.addEventListener("click", (e) => {
-    const symEl = (e.target as HTMLElement).closest(".sym") as HTMLElement | null;
-    if (!symEl) return;
+    const target = e.target as HTMLElement;
+    const symEl = target.closest(".sym") as HTMLElement | null;
+    const lineEl = target.closest(".code-line") as HTMLElement | null;
+    let changed = false;
 
-    e.stopPropagation();
-
-    const name = symEl.getAttribute("data-sym");
-    if (!name) return;
-
-    const lineEl = symEl.closest(".code-line");
-    const lineNo = lineEl ? Number(lineEl.getAttribute("data-line")) : null;
-
-    if (state.highlightedSymbol === name) {
-      state.highlightedSymbol = null;
-      state.highlightedSymbolLine = null;
-    } else {
-      state.highlightedSymbol = name;
-      state.highlightedSymbolLine = lineNo;
+    const name = symEl?.getAttribute("data-sym");
+    if (name) {
+      const lineNo = lineEl ? Number(lineEl.getAttribute("data-line")) : null;
+      if (state.highlightedSymbol === name) {
+        state.highlightedSymbol = null;
+        state.highlightedSymbolLine = null;
+      } else {
+        state.highlightedSymbol = name;
+        state.highlightedSymbolLine = lineNo;
+      }
+      changed = true;
     }
 
-    renderQuiz();
+    if (lineEl?.classList.contains("clickable")) {
+      toggleLine(Number(lineEl.getAttribute("data-line")));
+      changed = true;
+    }
+
+    if (changed) renderQuiz();
   });
 
   if (!state.answered) {
     document.querySelectorAll(".code-line.clickable").forEach((el) => {
-      el.addEventListener("click", () => toggleLine(Number(el.getAttribute("data-line"))));
       el.addEventListener("keydown", (e) => {
         const event = e as KeyboardEvent;
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          toggleLine(Number(el.getAttribute("data-line")));
-        }
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        const lineNo = Number(el.getAttribute("data-line"));
+        toggleLine(lineNo);
+        renderQuiz();
+        // 再描画で DOM が入れ替わるため、操作した行へフォーカスを戻す
+        document.querySelector<HTMLElement>(`.code-line[data-line="${lineNo}"]`)?.focus();
       });
     });
 
@@ -615,7 +623,7 @@ function renderQuiz(): void {
 
 function renderResult(): void {
   const total = state.quizQuestions.length;
-  const percentage = Math.round((state.score / total) * 100);
+  const percentage = total === 0 ? 0 : Math.round((state.score / total) * 100);
   const meta = DIFFICULTY_META[state.difficulty];
 
   let message: string;
@@ -654,6 +662,7 @@ function renderResult(): void {
   });
 }
 
+/** 選択状態の更新のみ。再描画は呼び出し側でまとめて行う */
 function toggleLine(lineNo: number): void {
   if (state.answered) return;
   if (state.selectedLines.has(lineNo)) {
@@ -662,7 +671,6 @@ function toggleLine(lineNo: number): void {
     state.selectedLines.add(lineNo);
   }
   persistCurrentProgress();
-  renderQuiz();
 }
 
 function submitAnswer(): void {

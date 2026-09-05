@@ -64,8 +64,22 @@ export function hasStartedProgress(progress: DifficultyProgress): boolean {
 }
 
 function normalizeProgress(progress: DifficultyProgress): DifficultyProgress | null {
+  // localStorage の値は壊れている可能性があるため、形から確認する
+  if (!Array.isArray(progress.questionIds) || !Array.isArray(progress.selectedLines)) {
+    return null;
+  }
+
   const len = progress.questionIds.length;
   if (len === 0) return null;
+
+  // currentIndex が壊れていると questionResults へ範囲外書き込みが起きるため先に弾く
+  if (
+    !Number.isInteger(progress.currentIndex) ||
+    progress.currentIndex < 0 ||
+    progress.currentIndex >= len
+  ) {
+    return null;
+  }
 
   const questionResults = Array.isArray(progress.questionResults)
     ? [...progress.questionResults]

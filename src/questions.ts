@@ -496,7 +496,7 @@ export const questions: QuizQuestion[] = [
       "    public void fetch() {",
       "        log.debug(\"Sending request to {}\", request.uri());",
       "        try {",
-      "            client.send(request);",
+      "            client.send(request, HttpResponse.BodyHandlers.ofString());",
       "            log.info(\"Request completed successfully\");",
       "        } catch (Exception e) {",
       "            log.warn(\"failed\", e);",
