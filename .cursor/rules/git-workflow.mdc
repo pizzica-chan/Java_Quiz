@@ -1,0 +1,14 @@
+---
+description: ブランチ運用ルール（main/master の同期）
+globs:
+alwaysApply: true
+---
+
+# ブランチ運用
+
+Claude Code 向けの同等ルールは [CLAUDE.md](../../CLAUDE.md) にあります（内容を同期させてください）。
+
+- 実質の作業ブランチは **`main`**。GitHub 上の default branch は **`master`**（PR のターゲットもこちら）
+- `main` に push すると [.github/workflows/sync-main-to-master.yml](../../.github/workflows/sync-main-to-master.yml) が自動で `master` にマージ・push する。**手動で `master` に同期し直す必要はない**
+- 自動マージがコンフリクトした場合、この workflow は失敗する（Actions タブに出る）。その場合だけ手動で `git checkout master && git merge main` してコンフリクトを解消し push する
+- `master` に直接コミットしない（`main` との乖離を生むため）。作業は常に `main` に対して行う
