@@ -62,6 +62,8 @@ npm run preview
 
 クイズ問題の追加・変更時は `.cursor/rules/quiz-fairness.mdc`（Cursor 用）/ `CLAUDE.md`（Claude Code 用、内容は同期）に従い、説明文・正解行・解説の整合、行選択形式との相性を必ず確認すること。
 
+作業は `main` ブランチに対して行う。GitHub 上の default branch は `master` だが、`main` への push で GitHub Actions（`.github/workflows/sync-main-to-master.yml`）が自動的に `master` へマージするため、手動での同期は不要。
+
 ## ライセンス
 
 MIT

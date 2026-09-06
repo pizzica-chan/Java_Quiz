@@ -1,0 +1,41 @@
+name: main を master に自動同期
+
+# main への push のたびに、その内容を master へマージして push する。
+# これは主に main が実質の作業ブランチ、master が GitHub 上の default branch
+# （PR のターゲット）という運用のズレを埋めるためのもの。
+# コンフリクトが起きた場合は自動マージを諦め、このジョブを失敗させる
+# （Actions タブに失敗が出るので、手動で `git merge main` して解消し push する）。
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: master
+
+      - name: git ユーザー設定
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: main を master にマージ
+        run: |
+          set -e
+          if git merge --ff-only origin/main; then
+            echo "fast-forward で同期しました"
+          else
+            git merge --no-ff origin/main -m "chore: main を master に自動同期"
+          fi
+
+      - name: master を push
+        run: git push origin master

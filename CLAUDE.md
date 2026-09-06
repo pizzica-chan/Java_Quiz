@@ -1,11 +1,15 @@
 # CLAUDE.md
 
 このファイルは Claude Code (claude.ai/code) がこのリポジトリで作業する際のルールです。
-Cursor 向けの同等ルールは [.cursor/rules/quiz-fairness.mdc](.cursor/rules/quiz-fairness.mdc) にあります。
-**内容は常に両ファイルで同期させてください**（一方だけ更新して終わらない）。
 
-対象ファイル: `src/questions.ts`, `src/moreQuestions.ts`, `src/validateQuestions.ts`, `src/quizUtils.ts`, `src/main.ts`
-（クイズ問題の追加・変更、採点ロジック、検証ロジックに触れるとき）
+## ブランチ運用
+
+- 実質の作業ブランチは **`main`**。GitHub 上の default branch は **`master`**（PR のターゲットもこちら）
+- `main` に push すると [.github/workflows/sync-main-to-master.yml](.github/workflows/sync-main-to-master.yml) が自動で `master` にマージ・push する。**手動で `master` に同期し直す必要はない**
+- 自動マージがコンフリクトした場合、この workflow は失敗する（Actions タブに出る）。その場合だけ手動で `git checkout master && git merge main` してコンフリクトを解消し push する
+- `master` に直接コミットしない（`main` との乖離を生むため）。作業は常に `main` に対して行う
+
+Cursor 向けの同等ルールは [.cursor/rules/git-workflow.mdc](.cursor/rules/git-workflow.mdc) にあります（内容を同期させてください）。
 
 ## プロジェクト概要
 
@@ -13,6 +17,12 @@ Java のコードサンプルからアンチパターン行を見つけるフロ
 難易度別 90 問（初心者/中級者/上級者 各 30 問）。詳細は [README.md](README.md) 参照。
 
 ## クイズ問題の公平性ルール
+
+対象ファイル: `src/questions.ts`, `src/moreQuestions.ts`, `src/validateQuestions.ts`, `src/quizUtils.ts`, `src/main.ts`
+（クイズ問題の追加・変更、採点ロジック、検証ロジックに触れるとき）
+
+Cursor 向けの同等ルールは [.cursor/rules/quiz-fairness.mdc](.cursor/rules/quiz-fairness.mdc) にあります。
+**内容は常に両ファイルで同期させてください**（一方だけ更新して終わらない）。
 
 このプロジェクトでは、学習者が「理不尽だ」と感じないことを最優先する。
 
