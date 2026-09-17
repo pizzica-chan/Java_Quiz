@@ -214,6 +214,17 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/**
+ * 新しい画面・新しい問題を表示する直前に呼ぶ。
+ * innerHTML の書き換えではスクロール位置が保たれてしまうため、
+ * 「前の問題を読み終えた位置のまま次の問題が表示される」という不便を防ぐ。
+ * 行選択やヒント表示、解答表示など、同じ問題内での再描画では呼ばない
+ * （呼ぶと操作のたびに画面が先頭に飛んで、逆に使いにくくなる）。
+ */
+function scrollToTop(): void {
+  window.scrollTo(0, 0);
+}
+
 function renderStart(): void {
   const difficultyCards = DIFFICULTIES.map((d, index) => {
     const meta = DIFFICULTY_META[d];
@@ -334,6 +345,7 @@ function switchListDifficulty(difficulty: Difficulty): void {
   saveCurrentDifficultySession();
   state.difficulty = difficulty;
   ensureQuizSession();
+  scrollToTop();
   renderQuestionList();
 }
 
@@ -421,6 +433,7 @@ function renderQuestionList(): void {
       state.screen = "start";
     }
 
+    scrollToTop();
     render();
   });
 }
@@ -428,6 +441,7 @@ function renderQuestionList(): void {
 function goToTop(): void {
   persistCurrentProgress();
   state.screen = "start";
+  scrollToTop();
   render();
 }
 
@@ -658,6 +672,7 @@ function renderResult(): void {
   document.getElementById("retry-btn")!.addEventListener("click", () => startQuiz(true));
   document.getElementById("home-btn")!.addEventListener("click", () => {
     state.screen = "start";
+    scrollToTop();
     render();
   });
 }
@@ -701,10 +716,12 @@ function nextQuestion(): void {
     state.currentIndex++;
     applyQuestionState(state.currentIndex);
     persistCurrentProgress();
+    scrollToTop();
     renderQuiz();
   } else if (state.questionResults.every((r) => r !== null)) {
     clearProgress(state.difficulty);
     state.screen = "result";
+    scrollToTop();
     render();
   } else {
     openQuestionList("quiz");
@@ -745,6 +762,7 @@ function openQuestionList(origin: "start" | "quiz"): void {
 
   state.listOrigin = origin;
   state.screen = "list";
+  scrollToTop();
   render();
 }
 
@@ -756,6 +774,7 @@ function goToQuestion(index: number): void {
   applyQuestionState(index);
   state.screen = "quiz";
   persistCurrentProgress();
+  scrollToTop();
   render();
 }
 
@@ -769,6 +788,7 @@ function startQuiz(fresh: boolean): void {
     if (saved) {
       if (hasStartedProgress(saved) && restoreQuizFromProgress(saved)) {
         state.screen = "quiz";
+        scrollToTop();
         render();
         return;
       }
@@ -784,6 +804,7 @@ function startQuiz(fresh: boolean): void {
   syncScoreFromResults();
   state.screen = "quiz";
   persistCurrentProgress();
+  scrollToTop();
   render();
 }
 
